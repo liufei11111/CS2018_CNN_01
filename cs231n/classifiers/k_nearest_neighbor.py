@@ -73,7 +73,7 @@ class KNearestNeighbor(object):
         # training point, and store the result in dists[i, j]. You should   #
         # not use a loop over dimension.                                    #
         #####################################################################
-        pass
+        dists[i,j] = np.sum((X[i,:] - self.X_train[j,:])**2)
         #####################################################################
         #                       END OF YOUR CODE                            #
         #####################################################################
@@ -95,7 +95,7 @@ class KNearestNeighbor(object):
       # Compute the l2 distance between the ith test point and all training #
       # points, and store the result in dists[i, :].                        #
       #######################################################################
-      pass
+      dists[i,:] = np.sum((X[i, :] - self.X_train)**2, axis=1)
       #######################################################################
       #                         END OF YOUR CODE                            #
       #######################################################################
@@ -123,7 +123,15 @@ class KNearestNeighbor(object):
     # HINT: Try to formulate the l2 distance using matrix multiplication    #
     #       and two broadcast sums.                                         #
     #########################################################################
-    pass
+    test_square_sum = np.sum(X**2, axis=1)
+    train_square_sum = np.sum(self.X_train**2, axis=1).T
+    dists = dists + train_square_sum
+    # print(dists.shape)
+    dists = dists + np.expand_dims(test_square_sum,axis=1)
+    # print(dists.shape)
+    cross_product = X.dot(self.X_train.T)
+    # print(cross_product.shape)
+    dists -= 2 * cross_product
     #########################################################################
     #                         END OF YOUR CODE                              #
     #########################################################################
@@ -148,6 +156,7 @@ class KNearestNeighbor(object):
       # A list of length k storing the labels of the k nearest neighbors to
       # the ith test point.
       closest_y = []
+
       #########################################################################
       # TODO:                                                                 #
       # Use the distance matrix to find the k nearest neighbors of the ith    #
@@ -155,7 +164,12 @@ class KNearestNeighbor(object):
       # neighbors. Store these labels in closest_y.                           #
       # Hint: Look up the function numpy.argsort.                             #
       #########################################################################
-      pass
+      # if k <=0:
+      #   break
+      index_sorted = np.argsort(dists[i,:])
+      sorted_list=index_sorted[:k]
+
+      closest_y = self.y_train[sorted_list].tolist()
       #########################################################################
       # TODO:                                                                 #
       # Now that you have found the labels of the k nearest neighbors, you    #
@@ -163,10 +177,22 @@ class KNearestNeighbor(object):
       # Store this label in y_pred[i]. Break ties by choosing the smaller     #
       # label.                                                                #
       #########################################################################
-      pass
+      # print (closest_y)
+      cnt_dic = {}
+      for x in closest_y:
+        if x in cnt_dic:
+          cnt_dic[x]=cnt_dic[x]+1
+        else:
+          cnt_dic[x]=1
+      # print(cnt_dic)
+      max_value = 0
+      for key,value in cnt_dic.items():
+        if value > max_value:
+          y_pred[i]=key
+          max_value=value
       #########################################################################
       #                           END OF YOUR CODE                            # 
       #########################################################################
-
+    # print(y_pred)
     return y_pred
 
