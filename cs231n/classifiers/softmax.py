@@ -78,9 +78,9 @@ def softmax_loss_vectorized(W, X, y, reg):
 
   x_range = range(num_train)
   scores = X.dot(W)
-  scores -= np.expand_dims(np.max(scores,axis=1),axis=1)
+  scores -= np.max(scores)
   scores=np.exp(scores)
-  scores_sum = np.expand_dims(np.sum(scores,axis=1),axis=1)
+  scores_sum = np.sum(scores,axis=1)
   predicted_score = scores[x_range, y]
   loss += - np.sum(np.log( predicted_score / scores_sum))
 
